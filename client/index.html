@@ -14,6 +14,33 @@
             ctx.fillText(data[i].number, data[i].x, data[i].y);
         }
     });
+
+    //Al PRESIONAR una tecla
+    document.onkeydown = function(event){
+        if(event.keyCode === 68){
+            socket.emit('keyPress',{inputId:'right', state:true});
+            console.log("PEPEPEPEPE");
+        } //tecla D
+
+        if(event.keyCode === 83) //tecla S
+            socket.emit('keyPress',{inputId:'down', state:true});
+        if(event.keyCode === 65) //tecla A
+            socket.emit('keyPress',{inputId:'left', state:true});
+        if(event.keyCode === 87) //tecla W
+            socket.emit('keyPress',{inputId:'up', state:true});
+    }
+
+    //Al SOLTAR una tecla
+    document.onkeyup = function(event){
+        if(event.keyCode === 68) //tecla D
+            socket.emit('keyPress',{inputId:'right', state:false});
+        if(event.keyCode === 83) //tecla S
+            socket.emit('keyPress',{inputId:'down', state:false});
+        if(event.keyCode === 65) //tecla A
+            socket.emit('keyPress',{inputId:'left', state:false});
+        if(event.keyCode === 87) //tecla W
+            socket.emit('keyPress',{inputId:'up', state:false});
+    }
 </script>
 
 

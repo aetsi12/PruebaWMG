@@ -25,35 +25,81 @@ app.use('/client', express.static(__dirname + '/client'));
 serv.listen(2000); //El puerto al que escucha el servidor
 /*===========================================================================================================*/
 
-/*SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO*/
 var SOCKET_LIST = {};
+var PLAYER_LIST = {};
 
+/*PLAYER====PLAYER====PLAYER====PLAYER====PLAYER====PLAYER====PLAYER====PLAYER====PLAYER====PLAYER====PLAYER*/
+var Player = function(id){
+    var self = {
+        x: 250,
+        y:250,
+        id: id,
+        number:"" + Math.floor(10 * Math.random()),
+        pressingRight: false,
+        pressingLeft: false,
+        pressingUp: false,
+        pressingDown: false,
+        maxSpd:10
+    }
+    //MOVIMIENTO
+    self.udaptePosition = function(){
+        if(self.pressingRight)
+            self.x += self.maxSpd;
+        if(self.pressingLeft)
+            self.x -= self.maxSpd;
+        if(self.pressingDown)
+            self.y += self.maxSpd;
+        if(self.pressingUp){
+            self.y -= self.maxSpd;
+        }
+    }
+    return self;
+}
+/*==========================================================================================================*/
+
+/*SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO*/
 var io = require('socket.io')(serv, {});
 io.sockets.on('connection', function(socket){
     socket.id = Math.random(); //CAMBIAR ESTO A ALGO MAS PRO
-    socket.x = 0;
-    socket.y = 0;
-    socket.number = "" + Math.floor(10 * Math.random());
     SOCKET_LIST[socket.id] = socket;
+
+    var player = Player(socket.id);
+    PLAYER_LIST[socket.id] = player;
 
     socket.on('disconnect', function(){
         delete SOCKET_LIST[socket.id];
+        delete PLAYER_LIST[socket.id];
     })
+
+    socket.on('keyPress', function(data){
+        if(data.inputId === 'left')
+           player.pressingLeft = data.state;
+        if(data.inputId === 'right')
+            player.pressingRight = data.state;
+        if(data.inputId === 'up')
+            player.pressingUp = data.state;
+        if(data.inputId === 'down')
+            player.pressingDown = data.state;
+    });
 });
 /*=================================================================================================================*/
+
+/*LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP*/
 setInterval(function(){ //LOOP
     var pack = [] //tendrá la información de cada player
-    for(var i in SOCKET_LIST){
-        var socket = SOCKET_LIST[i];
-        socket.x+=1;
-        socket.y+=1;
+    for(var i in PLAYER_LIST){
+        var player = PLAYER_LIST[i];
+        player.udaptePosition(); //Muevete vago!
         pack.push({
-            x:socket.x,
-            y:socket.y,
-            number:socket.number
+            x:player.x,
+            y:player.y,
+            number:player.number
         });
     }
     for(var i in SOCKET_LIST){
+        var socket = SOCKET_LIST[i];
         socket.emit('newPos',pack);
     }
 },1000/25); //Será llamado cada 40ms
+/*============================================================================================================*/
+
