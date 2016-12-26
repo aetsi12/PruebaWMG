@@ -1,1 +1,22 @@
 Hello world
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.2/socket.io.js"></script>-->
+<script>
+    var socket = io(); //Inicializa la conexión entre el cliente y el servidor
+
+    var happy = function(){
+        socket.emit('happy',{
+            reason: 'the button was clicked!'
+        });
+    }
+
+    socket.on('serverMsg', function(data){
+        console.log(data.msg);
+    })
+</script>
+
+<button onclick="happy()">HAPPY</button>
+
+
+
