@@ -10,18 +10,18 @@
 
     socket.on('newPos', function(data){
         ctx.clearRect(0, 0, 500, 500);
-        for(var i=0; i < data.length; i++){
-            ctx.fillText(data[i].number, data[i].x, data[i].y);
+        for(var i=0; i < data.player.length; i++){
+            ctx.fillText(data.player[i].number, data.player[i].x, data.player[i].y);
+        }
+        for(var i=0; i < data.bullet.length; i++){
+            ctx.fillText("1", data.bullet[i].x, data.bullet[i].y);
         }
     });
 
     //Al PRESIONAR una tecla
     document.onkeydown = function(event){
-        if(event.keyCode === 68){
+        if(event.keyCode === 68) //tecla D
             socket.emit('keyPress',{inputId:'right', state:true});
-            console.log("PEPEPEPEPE");
-        } //tecla D
-
         if(event.keyCode === 83) //tecla S
             socket.emit('keyPress',{inputId:'down', state:true});
         if(event.keyCode === 65) //tecla A
