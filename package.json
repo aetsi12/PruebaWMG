@@ -1,0 +1,19 @@
+{
+  "name": "mmog",
+  "version": "1.0.0",
+  "description": "una prueba de mmo online web",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aetsi12/PruebaWMG.git"
+  },
+  "author": "Aetsi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aetsi12/PruebaWMG/issues"
+  },
+  "homepage": "https://github.com/aetsi12/PruebaWMG#readme"
+}
