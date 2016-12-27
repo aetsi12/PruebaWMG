@@ -1,20 +1,57 @@
-<canvas id="ctx" width="500" height="500" style="border:1px solid #000000;"></canvas>
+<!--<div id="signDiv">
+    Username: <input id="signDiv-username" type="text"></input><br>
+    Password: <input id="signDiv-password" type="password"></input><br>
+    <button id="signDiv-signIn">Registrarse</button>
+    <button id="signDiv-signUp">Acceder</button>
+</div>-->
 
-<div id="chat-text" style="width: 500px; height:100px;overflow-y:scroll">
-    <div>hello!</div>
+<div id="gameDiv" style="display:inline-block;">
+    <canvas id="ctx" width="500" height="500" style="border:1px solid #000000;"></canvas>
+
+    <div id="chat-text" style="width: 500px; height:100px;overflow-y:scroll">
+        <div>hello!</div>
+    </div>
+    <form id="chat-form">
+        <input id="chat-input" type="text" style="width:500px"></input>
+
+    </form>
 </div>
-<form id="chat-form">
-    <input id="chat-input" type="text" style="width:500px"></input>
-
-</form>
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.2/socket.io.js"></script>-->
 <script>
+    var socket = io(); //Inicializa la conexión entre el cliente y el servidor
+
+    //REGISTRO - LOGIN
+    /*var gameDiv = document.getElementById('gameDiv');
+    var signDiv = document.getElementById('signDiv');
+    var signDivUsername = document.getElementById('signDiv-username');
+    var signDivSignIn = document.getElementById('signDiv-signIn');
+    var signDivSignUp = document.getElementById('signDiv-signUp');
+    var signDivPassword = document.getElementById('signDiv-password');
+
+    signDivSignIn.onclick = function(){
+        socket.emit('signIn',{username:signDivUsername.value,password:signDivPassword.value});
+    }
+
+    socket.on('signInResponse', function(data){
+       if(data.success){
+           signDiv.style.display = 'none';
+           gameDiv.style.display = 'inline-block';
+       }else{
+           alert("Fallo al registrarse");
+       }
+    });
+
+    signDivSignUn.onclick = function(){
+        socket.emit('signUp',{username:signDivUsername.value,password:signDivPassword.value});
+    }*/
+
+    //JUEGO
     var ctx = document.getElementById('ctx').getContext("2d");
     ctx.font = "30px Arial";
 
-    var socket = io(); //Inicializa la conexión entre el cliente y el servidor
+
 
 
     //COSAS CHAT================================
@@ -72,6 +109,25 @@
         if(event.keyCode === 87) //tecla W
             socket.emit('keyPress',{inputId:'up', state:false});
     }
+
+    //Al presionar boton del ratón
+    document.onmousedown = function(event){
+        socket.emit('keyPress', {inputId:'attack', state:true});
+    }
+
+    //Al soltar el boton del ratón
+    document.onmouseup = function(event){
+        socket.emit('keyPress', {inputId:'attack', state:false});
+    }
+
+    //Angulo del ratón
+    document.onmousemove = function(event){
+        var x = -250 + event.clientX - 8;
+        var y = -250 + event.clientY - 8;
+        var angle = Math.atan2(y,x) / Math.PI * 180;
+        socket.emit('keyPress', {inputId:'mouseAngle',state:angle});
+    }
+
 </script>
 
 

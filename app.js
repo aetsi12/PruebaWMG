@@ -43,17 +43,20 @@ var Entity = function(){
         self.x += self.spdX;
         self.y += self.spdY;
     }
+    self.getDistance = function(pt){
+        return Math.sqrt(Math.pow(self.x-pt.x,2) + Math.pow(self.y-pt.y,2));
+    }
     return self;
 }
 /*==========================================================================================================*/
 
 /*BULLET====BULLET====BULLET====BULLET====BULLET====BULLET====BULLET====BULLET====BULLET====BULLET====BULLET====BULLET*/
-var Bullet = function(angle){
+var Bullet = function(parent,angle){
     var self = Entity();
     self.id = Math.random();
     self.spdX = Math.cos(angle/180*Math.PI) * 10;
     self.spdY = Math.sin(angle/180*Math.PI) * 10;
-
+    self.parent = parent; //No puedes dispararte a ti mismo papu
     self.timer = 0;
     self.toRemove = false;
     var super_update = self.update;
@@ -61,6 +64,16 @@ var Bullet = function(angle){
         if(self.timer++ > 100)
             self.toRemove = true;
         super_update();
+
+        var minus = true;
+        for(var i in Player.list){
+            var p = Player.list[i];
+            if(self.getDistance(p) < 32 && self.parent !== p.id){
+                p.number = "" + (parseInt(p.number)+1);
+                self.toRemove = true;
+            }
+
+        }
     }
     Bullet.list[self.id] = self;
     return self;
@@ -68,18 +81,18 @@ var Bullet = function(angle){
 Bullet.list = {};
 
 Bullet.update = function(){
-    if(Math.random() < 0.1){
-        Bullet(Math.random()*360);
-    }
-
     var pack = [];
     for(var i in Bullet.list){
         var bullet = Bullet.list[i];
         bullet.update();
-        pack.push({
-            x:bullet.x,
-            y:bullet.y,
-        });
+        if(bullet.toRemove)
+            delete Bullet.list[i];
+        else{
+            pack.push({
+                x:bullet.x,
+                y:bullet.y,
+            });
+        }
     }
     return pack;
 }
@@ -89,17 +102,55 @@ Bullet.update = function(){
 var Player = function(id){
     var self = Entity();
     self.id = id;
-    self.number = "" + Math.floor(10 * Math.random());
+    self.number = "" + Math.floor(9 * Math.random()+1);
+    self.muerto = false;
     self.pressingRight = false;
     self.pressingLeft = false;
     self.pressingUp = false;
     self.pressingDown = false;
+
+    self.pressingAttack = false;
+    self.mouseAngle = 0;
+    self.bulletTime = 0;
+
     self.maxSpd = 5;
 
     var super_update = self.update; //La de ENTITY
     self.update = function(){
         self.updateSpd(); //Calcula la velocidad
         super_update(); //Llama al update() de ENTITY
+
+        if(self.pressingAttack && self.bulletTime === 0){
+            self.number = "" + (parseInt(self.number)-1);
+            self.shootBullet(self.mouseAngle);
+            self.bulletTime += 1;
+        }
+
+        for(var i in Player.list){
+            var p = Player.list[i];
+            if(self.getDistance(p) < 32 && self.id !== p.id){
+                if(parseInt(self.number)<parseInt(p.number)){
+                    p.number = "" + (parseInt(self.number)+parseInt(p.number));
+                    self.muerto = true;
+                }
+            }
+        }
+
+        if(self.muerto)
+            delete Player.list[self.id];
+
+        if(self.bulletTime !== 0){
+            self.bulletTime += 1;
+            if(self.bulletTime === 10)
+                self.bulletTime = 0;
+        }
+
+    }
+
+    self.shootBullet = function(angle){
+        var b = Bullet(self.id, angle);
+        b.x = self.x;
+        b.y = self.y;
     }
 
     self.updateSpd = function(){
@@ -139,6 +190,10 @@ Player.onConnect = function(socket){
             player.pressingUp = data.state;
         if(data.inputId === 'down')
             player.pressingDown = data.state;
+        if(data.inputId === 'attack')
+            player.pressingAttack = data.state;
+        if(data.inputId === 'mouseAngle')
+            player.mouseAngle = data.state;
     });
 }
 Player.onDisconnect = function(socket){
@@ -185,11 +240,12 @@ io.sockets.on('connection', function(socket){
             socket.emit('evalAnswer', "DEBUG MODE OFF");
             return;
         }
-
         //Esto es peligroso D:
         var res = eval(data);
         socket.emit('evalAnswer', res);
     });
+
+    //REGISTRO - LOGIN
 });
 /*=================================================================================================================*/
 
