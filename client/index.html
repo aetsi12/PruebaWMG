@@ -1,5 +1,13 @@
 <canvas id="ctx" width="500" height="500" style="border:1px solid #000000;"></canvas>
 
+<div id="chat-text" style="width: 500px; height:100px;overflow-y:scroll">
+    <div>hello!</div>
+</div>
+<form id="chat-form">
+    <input id="chat-input" type="text" style="width:500px"></input>
+
+</form>
+
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.2/socket.io.js"></script>-->
 <script>
@@ -7,6 +15,29 @@
     ctx.font = "30px Arial";
 
     var socket = io(); //Inicializa la conexión entre el cliente y el servidor
+
+
+    //COSAS CHAT================================
+    var chatText = document.getElementById('chat-text');
+    var chatInput = document.getElementById('chat-input');
+    var chatForm = document.getElementById('chat-form');
+
+    socket.on('addToChat', function(data){
+        chatText.innerHTML += '<div>' + data + '</div>';
+    });
+    socket.on('evalAnswer', function(data){
+        console.log(data);
+    });
+
+    chatForm.onsubmit = function(e){
+        e.preventDefault();
+        if(chatInput.value[0] === '/') //Comando para el servidor (ej: ver la lista de players)
+            socket.emit('evalServer', chatInput.value.slice(1));
+        else
+            socket.emit('sendMsgToServer', chatInput.value);
+        chatInput.value = '';
+    }
+    //FIN COSAS CHAT============================
 
     socket.on('newPos', function(data){
         ctx.clearRect(0, 0, 500, 500);
