@@ -1,15 +1,16 @@
-<!--<div id="signDiv">
+<div id="signDiv">
     Username: <input id="signDiv-username" type="text"></input><br>
     Password: <input id="signDiv-password" type="password"></input><br>
-    <button id="signDiv-signIn">Registrarse</button>
-    <button id="signDiv-signUp">Acceder</button>
-</div>-->
+    <button id="signDiv-signIn">ENTRAR</button>
+    <button id="signDiv-signUp">REGISTRARSE</button>
+</div>
 
-<div id="gameDiv" style="display:inline-block;">
+<div id="gameDiv" style="display:none;">
     <canvas id="ctx" width="500" height="500" style="border:1px solid #000000;"></canvas>
 
     <div id="chat-text" style="width: 500px; height:100px;overflow-y:scroll">
-        <div>hello!</div>
+        <div>Nota: Bienvenido.</div>
+        <div>Nota: Recuerda usar '/' para el modo debug.</div>
     </div>
     <form id="chat-form">
         <input id="chat-input" type="text" style="width:500px"></input>
@@ -23,7 +24,7 @@
     var socket = io(); //Inicializa la conexión entre el cliente y el servidor
 
     //REGISTRO - LOGIN
-    /*var gameDiv = document.getElementById('gameDiv');
+    var gameDiv = document.getElementById('gameDiv');
     var signDiv = document.getElementById('signDiv');
     var signDivUsername = document.getElementById('signDiv-username');
     var signDivSignIn = document.getElementById('signDiv-signIn');
@@ -39,22 +40,31 @@
            signDiv.style.display = 'none';
            gameDiv.style.display = 'inline-block';
        }else{
-           alert("Fallo al registrarse");
+           alert("Datos incorrectos.");
+           signDivPassword.value = "";
+           signDivUsername.value = "";
        }
     });
 
-    signDivSignUn.onclick = function(){
+    signDivSignUp.onclick = function(){
+        if(signDivUsername.value==="" || signDivPassword.value===""){
+            alert("Por favor, rellena todos los campos.");
+            return;
+        }
         socket.emit('signUp',{username:signDivUsername.value,password:signDivPassword.value});
-    }*/
+    }
 
-    //JUEGO
-    var ctx = document.getElementById('ctx').getContext("2d");
-    ctx.font = "30px Arial";
+    socket.on('signUpResponse', function(data){
+       if(data.success){
+           alert("Cuenta registrada con exito.");
+       }else{
+           alert("Error al registrarse.");
+           signDivPassword.value = "";
+           signDivUsername.value = "";
+       }
+    });
 
-
-
-
-    //COSAS CHAT================================
+    //Cosas CHAT================================
     var chatText = document.getElementById('chat-text');
     var chatInput = document.getElementById('chat-input');
     var chatForm = document.getElementById('chat-form');
@@ -75,6 +85,10 @@
         chatInput.value = '';
     }
     //FIN COSAS CHAT============================
+
+    //JUEGO
+    var ctx = document.getElementById('ctx').getContext("2d");
+    ctx.font = "30px Arial";
 
     socket.on('newPos', function(data){
         ctx.clearRect(0, 0, 500, 500);
@@ -127,6 +141,8 @@
         var angle = Math.atan2(y,x) / Math.PI * 180;
         socket.emit('keyPress', {inputId:'mouseAngle',state:angle});
     }
+
+
 
 </script>
 
