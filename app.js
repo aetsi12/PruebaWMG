@@ -10,6 +10,12 @@
     +El servidor envia datos al cliente (Ex: Enemy position)*/
 
 
+/*MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO*/
+var mongojs = require("mongojs");
+var db = mongojs('localhost:27017/myGame', ['account', 'progress']); //url:puerto/bd, ['colección1', 'col2', etc.])
+//db.account.insert({username:"b", password:"bb"}); //Insertar!!
+/*========================================================================================================*/
+
 /*EXPRESS====EXPRESS====EXPRESS====EXPRESS====EXPRESS====EXPRESS====EXPRESS====EXPRESS====EXPRESS====EXPRESS*/
 var express = require('express');
 var app = express();
@@ -69,13 +75,18 @@ var Bullet = function(parent,angle){
         for(var i in Player.list){
             var p = Player.list[i];
             if(self.getDistance(p) < 32 && self.parent !== p.id){
-                p.number = "" + (parseInt(p.number)+1);
+                //p.number = "" + (parseInt(p.number)+1);
                 self.toRemove = true;
             }
 
         }
     }
     Bullet.list[self.id] = self;
+    initPack.bullet.push({
+        id:self.id,
+        x:self.x,
+        y:self.y,
+    });
     return self;
 }
 Bullet.list = {};
@@ -85,10 +96,12 @@ Bullet.update = function(){
     for(var i in Bullet.list){
         var bullet = Bullet.list[i];
         bullet.update();
-        if(bullet.toRemove)
+        if(bullet.toRemove){
             delete Bullet.list[i];
-        else{
+            removePack.bullet.push(bullet.id);
+        }else{
             pack.push({
+                id:bullet.id,
                 x:bullet.x,
                 y:bullet.y,
             });
@@ -121,14 +134,15 @@ var Player = function(id){
         super_update(); //Llama al update() de ENTITY
 
         if(self.pressingAttack && self.bulletTime === 0){
-            if(self.number === "1" || self.number === 1)
-                return
+            /*if(self.number === "1" || self.number === 1) //DISPARAR HASTA ESTAR EN 1
+                return;*/
             self.number = "" + (parseInt(self.number)-1);
             self.shootBullet(self.mouseAngle);
             self.bulletTime += 1;
         }
 
-        for(var i in Player.list){
+        //COMER O SER COMIDO
+        /*for(var i in Player.list){
             var p = Player.list[i];
             if(self.getDistance(p) < 32 && self.id !== p.id){
                 if(parseInt(self.number)<parseInt(p.number)){
@@ -136,10 +150,13 @@ var Player = function(id){
                     self.muerto = true;
                 }
             }
-        }
+        }*/
 
-        if(self.muerto)
+        //MUERTE
+        /*if(self.muerto){
             delete Player.list[self.id];
+            removePack.player.push(self.id);
+        }*/
 
         if(self.bulletTime !== 0){
             self.bulletTime += 1;
@@ -175,6 +192,12 @@ var Player = function(id){
     }
 
     Player.list[id] = self;
+    initPack.player.push({
+        id:self.id,
+        x:self.x,
+        y:self.y,
+        number:self.number,
+    });
     return self;
 }
 
@@ -200,6 +223,7 @@ Player.onConnect = function(socket){
 }
 Player.onDisconnect = function(socket){
     delete Player.list[socket.id];
+    removePack.player.push(socket.id);
 }
 Player.update = function(){
     var pack = [] //tendrá la información de cada player
@@ -208,6 +232,7 @@ Player.update = function(){
         var player = Player.list[i];
         player.update(); //Muevete vago!
         pack.push({
+            id:player.id,
             x:player.x,
             y:player.y,
             number:player.number
@@ -227,20 +252,25 @@ var USERS = {
 }
 
 var isValidPassword = function(data,callback){
-    setTimeout(function(){
-        callback(USERS[data.username] === data.password);
-    },10);
+    db.account.find({username:data.username, password:data.password},function(error, result){
+        if(result.length > 0)
+            callback(true);
+        else
+            callback(false);
+    });
 }
 var isUsernameTaken = function(data,callback){
-    setTimeout(function(){
-        callback(USERS[data.username]);
-    },10);
+    db.account.find({username:data.username},function(error, result){
+        if(result.length > 0)
+            callback(true);
+        else
+            callback(false);
+    });;
 }
 var addUser = function(data,callback){
-    setTimeout(function(){
-        USERS[data.username] = data.password;
+    db.account.insert({username:data.username, password:data.password},function(error){
         callback();
-    },10);
+    });
 }
 
 /*SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO*/
@@ -299,6 +329,10 @@ io.sockets.on('connection', function(socket){
 /*=================================================================================================================*/
 
 /*LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP====LOOP*/
+
+var initPack = {player:[], bullet:[]};
+var removePack = {player:[], bullet:[]};
+
 setInterval(function(){ //LOOP
     var pack = { //tendrá la información de los player y las bullets
         player: Player.update(),
@@ -307,8 +341,14 @@ setInterval(function(){ //LOOP
 
     for(var i in SOCKET_LIST){
         var socket = SOCKET_LIST[i];
-        socket.emit('newPos',pack);
+        socket.emit('init',initPack);
+        socket.emit('update',pack);
+        socket.emit('remove',removePack);
     }
+    initPack.player = [];
+    initPack.bullet = [];
+    removePack.bullet = [];
+    removePack.player = [];
 },1000/50); //Será llamado cada 40ms
 /*============================================================================================================*/
 
