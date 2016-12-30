@@ -75,7 +75,17 @@ var Bullet = function(parent,angle){
         for(var i in Player.list){
             var p = Player.list[i];
             if(self.getDistance(p) < 32 && self.parent !== p.id){
-                //p.number = "" + (parseInt(p.number)+1);
+                p.hp -= 1;
+
+                if(p.hp <= 0){ //Si ha muerto
+                    var shooter = Player.list[self.parent];
+                    if(shooter) //Si el que dispara no se ha desconectado (porque no podríamos sumarle en el score)
+                        shooter.score += 1;
+                    p.hp = p.hpMax;
+                    p.x = Math.random() * 500;
+                    p.y = Math.random() * 500;
+                }
+
                 self.toRemove = true;
             }
 
@@ -142,6 +152,10 @@ var Player = function(id){
     self.mouseAngle = 0;
     self.bulletTime = 0;
 
+    self.hp = 10;
+    self.hpMax = 10;
+    self.score = 0;
+
     self.maxSpd = 5;
 
     var super_update = self.update; //La de ENTITY
@@ -150,29 +164,11 @@ var Player = function(id){
         super_update(); //Llama al update() de ENTITY
 
         if(self.pressingAttack && self.bulletTime === 0){
-            /*if(self.number === "1" || self.number === 1) //DISPARAR HASTA ESTAR EN 1
-                return;*/
-            //self.number = "" + (parseInt(self.number)-1);
+
+
             self.shootBullet(self.mouseAngle);
             self.bulletTime += 1;
         }
-
-        //COMER O SER COMIDO
-        /*for(var i in Player.list){
-            var p = Player.list[i];
-            if(self.getDistance(p) < 32 && self.id !== p.id){
-                if(parseInt(self.number)<parseInt(p.number)){
-                    p.number = "" + (parseInt(self.number)+parseInt(p.number));
-                    self.muerto = true;
-                }
-            }
-        }*/
-
-        //MUERTE
-        /*if(self.muerto){
-            delete Player.list[self.id];
-            removePack.player.push(self.id);
-        }*/
 
         if(self.bulletTime !== 0){
             self.bulletTime += 1;
@@ -213,6 +209,9 @@ var Player = function(id){
             x:self.x,
             y:self.y,
             number:self.number,
+            hp:self.hp,
+            hpMax:self.hpMax,
+            score:self.score,
         };
     }
     self.getUpdatePack = function(){
@@ -220,6 +219,8 @@ var Player = function(id){
             id:self.id,
             x:self.x,
             y:self.y,
+            hp:self.hp,
+            score:self.score,
         };
     }
 
