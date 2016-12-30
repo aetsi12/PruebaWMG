@@ -64,6 +64,9 @@
        }
     });
 
+    var WIDTH = 500;
+    var HEIGHT = 500;
+
     //Cosas CHAT================================
     var chatText = document.getElementById('chat-text');
     var chatInput = document.getElementById('chat-input');
@@ -86,6 +89,15 @@
     }
     //FIN COSAS CHAT============================
 
+    //IMGs
+    var Img = {};
+    Img.player = new Image();
+    Img.player.src = '/client/img/player.png';
+    Img.bullet = new Image();
+    Img.bullet.src = '/client/img/bullet.png';
+    Img.map = new Image();
+    Img.map.src = '/client/img/fondo.png';
+
     //JUEGO
     var ctx = document.getElementById('ctx').getContext("2d");
     ctx.font = "30px Arial";
@@ -101,10 +113,20 @@
         self.score = initPack.score;
 
         self.draw = function(){
+            var x = self.x - Player.list[selfId].x + WIDTH/2;
+            var y = self.y - Player.list[selfId].y + HEIGHT/2;
+
             var hpWidth = 30 * self.hp / self.hpMax; //AJUSTAR BARRA DE VIDA
-            ctx.fillRect(self.x - hpWidth/2,self.y-40,hpWidth,4); //BARRA DE VIDA
-            ctx.fillText(self.number, self.x, self.y); //PJ
-            ctx.fillText(self.score,self.x,self.y-60); //SCORE
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(x - hpWidth/2,y-40,hpWidth,4); //BARRA DE VIDA
+
+            var width = Img.player.width*2;
+            var height = Img.player.height*2;
+
+            ctx.drawImage(Img.player, 0, 0, Img.player.width, Img.player.height, x-width/2, y-height/2, width, height);
+
+            //ctx.fillText(self.number, self.x, self.y); //PJ
+            //ctx.fillText(self.score,self.x,self.y-60); //SCORE
         }
 
         Player.list[self.id] = self;
@@ -119,7 +141,15 @@
         self.y = initPack.y;
 
         self.draw = function(){
-            ctx.fillRect(self.x, self.y,10,10);
+            var width = Img.bullet.width/2;
+            var height = Img.bullet.height/2;
+
+            var x = self.x - Player.list[selfId].x + WIDTH/2;
+            var y = self.y - Player.list[selfId].y + HEIGHT/2;
+
+            ctx.drawImage(Img.bullet, 0, 0, Img.bullet.width, Img.bullet.height, x-width/2, y-height/2, width, height);
+
+            //ctx.fillRect(self.x, self.y,10,10);
         }
 
         Bullet.list[self.id] = self;
@@ -127,8 +157,14 @@
     }
     Bullet.list = {};
 
+    //SELFID!!!
+    var selfId = null;
+
     //INIT: cuando nuevas cosas se creen, contiene todos los datos. Solo se llama una vez.
     socket.on('init', function(data){
+        if(data.selfId !== undefined){
+            selfId = data.selfId;
+        }
         for(var i = 0; i < data.player.length; i++){
             new Player(data.player[i]);
         }
@@ -168,7 +204,11 @@
 
     //LOOP
     setInterval(function(){
+        if(selfId == null)
+            return;
         ctx.clearRect(0, 0, 500, 500);
+        drawMap();
+        drawScore();
         for(var i in Player.list){
             Player.list[i].draw();
         }
@@ -187,6 +227,17 @@
             delete Bullet.list[data.bullet[i]];
         }
     });
+
+    var drawMap = function(){
+        var x = WIDTH/2 - Player.list[selfId].x;
+        var y = WIDTH/2 - Player.list[selfId].y;
+        ctx.drawImage(Img.map, x, y);
+    }
+
+    var drawScore = function(){
+        ctx.fillStyle = 'white';
+        ctx.fillText(Player.list[selfId].score, 0, 30);
+    }
 
     //Al PRESIONAR una tecla
     document.onkeydown = function(event){

@@ -80,10 +80,11 @@ var Bullet = function(parent,angle){
                 if(p.hp <= 0){ //Si ha muerto
                     var shooter = Player.list[self.parent];
                     if(shooter) //Si el que dispara no se ha desconectado (porque no podríamos sumarle en el score)
-                        shooter.score += 1;
+                        shooter.score += p.score+1;
                     p.hp = p.hpMax;
                     p.x = Math.random() * 500;
                     p.y = Math.random() * 500;
+                    p.score = 0;
                 }
 
                 self.toRemove = true;
@@ -164,8 +165,6 @@ var Player = function(id){
         super_update(); //Llama al update() de ENTITY
 
         if(self.pressingAttack && self.bulletTime === 0){
-
-
             self.shootBullet(self.mouseAngle);
             self.bulletTime += 1;
         }
@@ -250,6 +249,7 @@ Player.onConnect = function(socket){
     });
 
     socket.emit('init',{
+        selfId:socket.id,
         player: Player.getAllInitPack(),
         bullet: Bullet.getAllInitPack(),
     });
