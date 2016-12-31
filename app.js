@@ -12,7 +12,7 @@
 
 /*MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO*/
 //var mongojs = require("mongojs");
-//var db = mongojs('localhost:27017/myGame', ['account', 'progress']); //url:puerto/bd, ['colección1', 'col2', etc.])
+var db = null;//var db = mongojs('localhost:27017/myGame', ['account', 'progress']); //url:puerto/bd, ['colección1', 'col2', etc.])
 //db.account.insert({username:"b", password:"bb"}); //Insertar!!
 /*========================================================================================================*/
 
