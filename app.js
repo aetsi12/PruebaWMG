@@ -11,8 +11,8 @@
 
 
 /*MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO====MONGO*/
-var mongojs = require("mongojs");
-var db = mongojs('localhost:27017/myGame', ['account', 'progress']); //url:puerto/bd, ['colección1', 'col2', etc.])
+//var mongojs = require("mongojs");
+//var db = mongojs('localhost:27017/myGame', ['account', 'progress']); //url:puerto/bd, ['colección1', 'col2', etc.])
 //db.account.insert({username:"b", password:"bb"}); //Insertar!!
 /*========================================================================================================*/
 
@@ -28,7 +28,9 @@ app.use('/client', express.static(__dirname + '/client'));
 //De esta forma solo se puede acceder '/' (y te redirecciona a /client/index) y a lo que hay dentro de '/client'
 //No se podría acceder, por ejemplo, a /server/archivoSecreto.xml
 
-serv.listen(2000); //El puerto al que escucha el servidor
+//serv.listen(2000); //El puerto al que escucha el servidor
+serv.listen(process.env.PORT || 2000); //HEROKU
+console.log("Servidor iniciado.")
 /*===========================================================================================================*/
 
 var SOCKET_LIST = {};
@@ -288,25 +290,28 @@ var USERS = {
 }
 
 var isValidPassword = function(data,callback){
-    db.account.find({username:data.username, password:data.password},function(error, result){
+    return cb(true);
+    /*db.account.find({username:data.username, password:data.password},function(error, result){
         if(result.length > 0)
             callback(true);
         else
             callback(false);
-    });
+    });*/
 }
 var isUsernameTaken = function(data,callback){
-    db.account.find({username:data.username},function(error, result){
+    return cb(false);
+    /*db.account.find({username:data.username},function(error, result){
         if(result.length > 0)
             callback(true);
         else
             callback(false);
-    });;
+    });*/
 }
 var addUser = function(data,callback){
-    db.account.insert({username:data.username, password:data.password},function(error){
+    return cb();
+    /*db.account.insert({username:data.username, password:data.password},function(error){
         callback();
-    });
+    });*/
 }
 
 /*SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO====SOCKET.IO*/

@@ -4,7 +4,7 @@
   "description": "una prueba de mmo online web",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +15,13 @@
   "bugs": {
     "url": "https://github.com/aetsi12/PruebaWMG/issues"
   },
-  "homepage": "https://github.com/aetsi12/PruebaWMG#readme"
+  "homepage": "https://github.com/aetsi12/PruebaWMG#readme",
+  "dependencies": {
+    "express": "^4.14.0",
+    "mongojs": "^2.4.0",
+    "socket.io": "^1.7.2"
+  },
+  "engines":  {
+      "node": "6.9.1"
+  }
 }
