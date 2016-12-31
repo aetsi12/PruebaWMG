@@ -290,7 +290,7 @@ var USERS = {
 }
 
 var isValidPassword = function(data,callback){
-    return cb(true);
+    return callback(true);
     /*db.account.find({username:data.username, password:data.password},function(error, result){
         if(result.length > 0)
             callback(true);
@@ -299,7 +299,7 @@ var isValidPassword = function(data,callback){
     });*/
 }
 var isUsernameTaken = function(data,callback){
-    return cb(false);
+    return callback(false);
     /*db.account.find({username:data.username},function(error, result){
         if(result.length > 0)
             callback(true);
@@ -308,7 +308,7 @@ var isUsernameTaken = function(data,callback){
     });*/
 }
 var addUser = function(data,callback){
-    return cb();
+    return callback();
     /*db.account.insert({username:data.username, password:data.password},function(error){
         callback();
     });*/
