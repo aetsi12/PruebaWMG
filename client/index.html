@@ -6,17 +6,23 @@
 </div>
 
 <div id="gameDiv" style="display:none;">
-    <canvas id="ctx" width="500" height="500" style="position:absolute;letf:8px;top:8px;border:1px solid #000000;"></canvas>
-    <canvas id="ctx-ui" width="500" height="500" style="position:absolute;left:8px;top:8px;border:1px solid #000000;"></canvas>
-
-    <div id="chat-text" style="width: 500px; height:100px;margin-top:510px; overflow-y:scroll">
-        <div>Nota: Bienvenido.</div>
-        <div>Nota: Recuerda usar '/' para el modo debug.</div>
+    <div id="game" style="position:absolute;width:500px;height:500px">
+        <canvas id="ctx" width="500" height="500" style="position:absolute;border:1px solid #000000;"></canvas>
+        <canvas id="ctx-ui" width="500" height="500" style="position:absolute;border:1px solid #000000;"></canvas>
+        <div id="ui" style="position:absolute;width:500px;height:500px;">
+            <!--Botones, score, inventario, dialogos entre NPC, bla bla bla-->
+            <button onclick="changeMap()" style="position:absolute;bottom:0px;left:0px;">Change Map</button>
+        </div>
     </div>
-    <form id="chat-form">
-        <input id="chat-input" type="text" style="width:500px"></input>
-
-    </form>
+    <div id="belowGame" style="margin-top:520px">
+        <div id="chat-text" style="width: 500px; height:100px;overflow-y:scroll">
+            <div>Nota: Bienvenido.</div>
+            <div>Nota: Recuerda usar '/' para el modo debug.</div>
+        </div>
+        <form id="chat-form">
+            <input id="chat-input" type="text" style="width:500px"></input>
+        </form>
+    </div>
 </div>
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
@@ -89,6 +95,11 @@
         chatInput.value = '';
     }
     //FIN COSAS CHAT============================
+
+    //UI
+    var changeMap = function(){
+        socket.emit('changeMap')
+    }
 
     //IMGs
     var Img = {};
@@ -203,6 +214,8 @@
                     p.hp = pack.hp;
                 if(pack.score !== undefined)
                     p.score = pack.score;
+                if(pack.map !== undefined)
+                    p.map = pack.map;
             }
         }
         for(var i = 0; i < data.bullet.length; i++){

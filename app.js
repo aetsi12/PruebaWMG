@@ -240,6 +240,7 @@ var Player = function(param){
             y:self.y,
             hp:self.hp,
             score:self.score,
+            map:self.map,
         };
     }
 
@@ -272,6 +273,13 @@ Player.onConnect = function(socket){
             player.pressingAttack = data.state;
         if(data.inputId === 'mouseAngle')
             player.mouseAngle = data.state;
+    });
+
+    socket.on('changeMap', function(data){
+        if(player.map === 'field')
+            player.map = 'house';
+        else
+            player.map = 'field';
     });
 
     socket.emit('init',{
